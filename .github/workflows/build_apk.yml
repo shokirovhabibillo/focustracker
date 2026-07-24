@@ -22,27 +22,47 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.22.0'
           cache: true
 
       - name: Get Dependencies
         run: flutter pub get
 
-      - name: Re-create Android files
+      - name: Re-create Android files correctly
         run: |
           rm -rf android
           flutter create . --platforms=android --org com.example
 
-      - name: Set compileSdkVersion to 35
+      - name: Inject Legacy Gradle Properties & SDK 35
         run: |
           python3 -c "
-          path = 'android/app/build.gradle'
-          with open(path, 'r') as f:
-              content = f.read()
-          content = content.replace('compileSdk = flutter.compileSdkVersion', 'compileSdk = 35')
-          content = content.replace('compileSdkVersion flutter.compileSdkVersion', 'compileSdkVersion 35')
-          with open(path, 'w') as f:
-              f.write(content)
+          # 1. build.gradle (app) ichiga compileSdk 35 joylash
+          app_gradle = 'android/app/build.gradle'
+          with open(app_gradle, 'r') as f:
+              c = f.read()
+          
+          c = c.replace('compileSdk = flutter.compileSdkVersion', 'compileSdk = 35')
+          c = c.replace('compileSdkVersion flutter.compileSdkVersion', 'compileSdkVersion 35')
+          c = c.replace('targetSdk = flutter.targetSdkVersion', 'targetSdk = 35')
+          
+          with open(app_gradle, 'w') as f:
+              f.write(c)
+
+          # 2. Root build.gradle ga ext xossalarini qo'shish (package_info_plus va audioplayers uchun)
+          root_gradle = 'android/build.gradle'
+          with open(root_gradle, 'r') as f:
+              rg = f.read()
+          
+          ext_block = '''
+          buildscript {
+              ext.kotlin_version = '1.9.22'
+              ext.compileSdkVersion = 35
+              ext.minSdkVersion = 21
+              ext.targetSdkVersion = 35
+          }
+          '''
+          with open(root_gradle, 'w') as f:
+              f.write(ext_block + '\n' + rg)
           "
 
       - name: Build APK
