@@ -25,7 +25,7 @@ jobs:
           flutter-version: '3.24.0'
           cache: true
 
-      - name: Ensure Missing Asset Directories Exist
+      - name: Ensure Assets Directory
         run: |
           mkdir -p assets/images
           touch assets/images/.gitkeep
@@ -33,41 +33,36 @@ jobs:
       - name: Get Dependencies
         run: flutter pub get
 
-      - name: Re-create Android project
+      - name: Re-create Android Project (Groovy Language)
         run: |
           rm -rf android
-          flutter create . --platforms=android --org com.example
+          flutter create . --platforms=android --org com.example --language java
 
-      - name: Configure Desugaring & NDK Version
+      - name: Generate local.properties & Fix Gradle Config
         run: |
+          # 1. local.properties yaratish (SDK va Flutter yo'llari uchun)
+          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+          echo "flutter.sdk=$FLUTTER_ROOT" >> android/local.properties
+          echo "flutter.buildMode=release" >> android/local.properties
+          echo "flutter.versionName=1.0.0" >> android/local.properties
+          echo "flutter.versionCode=1" >> android/local.properties
+
+          # 2. Desugaring, compileSdk 35 va NDK versiyasini android/app/build.gradle fayliga kiritish
           python3 -c "
-          app_gradle = 'android/app/build.gradle.kts'
-          import os
+          app_gradle = 'android/app/build.gradle'
+          with open(app_gradle, 'r') as f:
+              c = f.read()
+
+          # compileSdkVersion va targetSdkVersion larni 35 ga ko'tarish
+          c = c.replace('compileSdkVersion flutter.compileSdkVersion', 'compileSdkVersion 35')
+          c = c.replace('targetSdkVersion flutter.targetSdkVersion', 'targetSdkVersion 35')
+          c = c.replace('android {', 'android {\n    ndkVersion \"27.0.12077973\"')
+          c = c.replace('compileOptions {', 'compileOptions {\n        coreLibraryDesugaringEnabled true')
           
-          # Kotlin DSL yoki Groovy ekanligini aniqlaymiz
-          if os.path.exists('android/app/build.gradle.kts'):
-              path = 'android/app/build.gradle.kts'
-              with open(path, 'r') as f:
-                  content = f.read()
-              
-              # Desugaring va NDK qo'shish
-              content = content.replace('android {', 'android {\n    ndkVersion = \"27.0.12077973\"')
-              content = content.replace('compileOptions {', 'compileOptions {\n        isCoreLibraryDesugaringEnabled = true')
-              content += '\ndependencies {\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")\n}\n'
-              
-              with open(path, 'w') as f:
-                  f.write(content)
-          elif os.path.exists('android/app/build.gradle'):
-              path = 'android/app/build.gradle'
-              with open(path, 'r') as f:
-                  content = f.read()
-              
-              content = content.replace('android {', 'android {\n    ndkVersion \"27.0.12077973\"')
-              content = content.replace('compileOptions {', 'compileOptions {\n        coreLibraryDesugaringEnabled true')
-              content += '\ndependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"\n}\n'
-              
-              with open(path, 'w') as f:
-                  f.write(content)
+          c += '\ndependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"\n}\n'
+
+          with open(app_gradle, 'w') as f:
+              f.write(c)
           "
 
       - name: Build APK
