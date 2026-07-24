@@ -33,27 +33,26 @@ jobs:
       - name: Get Dependencies
         run: flutter pub get
 
-      - name: Re-create Android Project (Groovy Language)
+      - name: Re-create Android Project
         run: |
           rm -rf android
-          flutter create . --platforms=android --org com.example --language java
+          flutter create . --platforms=android --org com.example --android-language java
 
       - name: Generate local.properties & Fix Gradle Config
         run: |
-          # 1. local.properties yaratish (SDK va Flutter yo'llari uchun)
+          # 1. local.properties yaratish
           echo "sdk.dir=$ANDROID_HOME" > android/local.properties
           echo "flutter.sdk=$FLUTTER_ROOT" >> android/local.properties
           echo "flutter.buildMode=release" >> android/local.properties
           echo "flutter.versionName=1.0.0" >> android/local.properties
           echo "flutter.versionCode=1" >> android/local.properties
 
-          # 2. Desugaring, compileSdk 35 va NDK versiyasini android/app/build.gradle fayliga kiritish
+          # 2. Desugaring, compileSdk 35 va NDK versiyasini sozlash
           python3 -c "
           app_gradle = 'android/app/build.gradle'
           with open(app_gradle, 'r') as f:
               c = f.read()
 
-          # compileSdkVersion va targetSdkVersion larni 35 ga ko'tarish
           c = c.replace('compileSdkVersion flutter.compileSdkVersion', 'compileSdkVersion 35')
           c = c.replace('targetSdkVersion flutter.targetSdkVersion', 'targetSdkVersion 35')
           c = c.replace('android {', 'android {\n    ndkVersion \"27.0.12077973\"')
