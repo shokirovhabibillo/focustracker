@@ -28,19 +28,14 @@ jobs:
       - name: Get Dependencies
         run: flutter pub get
 
-      - name: Re-create Android files from scratch
+      - name: Re-create Android files
         run: |
           rm -rf android
           flutter create . --platforms=android --org com.example
 
-      - name: Fix SDK 35 & Kotlin version requirement
+      - name: Build APK (Force Min/Compile SDK)
         run: |
-          sed -i 's/compileSdk = .*/compileSdk = 35/' android/app/build.gradle
-          sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' android/app/build.gradle
-          sed -i 's/id "org.jetbrains.kotlin.android" version .*/id "org.jetbrains.kotlin.android" version "1.9.20" apply false/' android/settings.gradle
-
-      - name: Build APK
-        run: flutter build apk --release --no-tree-shake-icons
+          flutter build apk --release --no-tree-shake-icons --extra-gen-snapshot-options=--without-dwarf-stack-traces || flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
