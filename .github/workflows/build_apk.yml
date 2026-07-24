@@ -33,13 +33,47 @@ jobs:
       - name: Get Dependencies
         run: flutter pub get
 
-      - name: Create Clean Android Structure
+      - name: Create & Fix Android Project
         run: |
           rm -rf android
           flutter create . --platforms=android --org com.example
 
-      - name: Build APK (Force Old Plugins Compat)
-        run: flutter build apk --release --no-tree-shake-icons --android-skip-build-dependency-validation
+          # Python orqali Gradle va Kotlin versiyalarini bir lahzada to'g'rilaymiz
+          python3 -c "
+          import re
+
+          # 1. Root build.gradle update (Kotlin -> 1.9.20 & Ext variables)
+          root_gradle = 'android/build.gradle'
+          with open(root_gradle, 'r') as f:
+              content = f.read()
+
+          content = re.sub(r'ext\.kotlin_version\s*=\s*[\"'].*?[\"']', 'ext.kotlin_version = \"1.9.20\"', content)
+          ext_block = '''
+          allprojects {
+              ext.compileSdkVersion = 35
+              ext.targetSdkVersion = 35
+              ext.minSdkVersion = 21
+          }
+          '''
+          with open(root_gradle, 'w') as f:
+              f.write(ext_block + '\n' + content)
+
+          # 2. app/build.gradle update (compileSdk = 35 & Desugaring)
+          app_gradle = 'android/app/build.gradle'
+          with open(app_gradle, 'r') as f:
+              ac = f.read()
+
+          ac = re.sub(r'compileSdk\s*=.*', 'compileSdk = 35', ac)
+          ac = re.sub(r'targetSdk\s*=.*', 'targetSdk = 35', ac)
+          ac = ac.replace('compileOptions {', 'compileOptions {\n        coreLibraryDesugaringEnabled true')
+          ac += '\ndependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"\n}\n'
+
+          with open(app_gradle, 'w') as f:
+              f.write(ac)
+          "
+
+      - name: Build APK
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
