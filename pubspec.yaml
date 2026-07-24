@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.6
+  package_info_plus: ^8.0.0 # yoki ^8.0.2 ga o'zgartiring (9.x versiyada Flutter Gradle Plugin ziddiyati bor)
 
   # State management
   provider: ^6.1.2
