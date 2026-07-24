@@ -33,50 +33,13 @@ jobs:
       - name: Get Dependencies
         run: flutter pub get
 
-      - name: Generate Android Folder
+      - name: Create Clean Android Structure
         run: |
+          rm -rf android
           flutter create . --platforms=android --org com.example
 
-      - name: Configure Android Gradle Files
-        run: |
-          echo "sdk.dir=$ANDROID_HOME" > android/local.properties
-          echo "flutter.sdk=$FLUTTER_ROOT" >> android/local.properties
-
-          python3 -c "
-          import re
-          
-          # 1. app/build.gradle ichida SDK va Desugaring sozlash
-          app_gradle = 'android/app/build.gradle'
-          with open(app_gradle, 'r') as f:
-              c = f.read()
-
-          c = re.sub(r'compileSdk\s*=.*', 'compileSdk = 35', c)
-          c = re.sub(r'targetSdk\s*=.*', 'targetSdk = 35', c)
-          c = c.replace('android {', 'android {\n    ndkVersion \"27.0.12077973\"')
-          c = c.replace('compileOptions {', 'compileOptions {\n        coreLibraryDesugaringEnabled true')
-          c += '\ndependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"\n}\n'
-
-          with open(app_gradle, 'w') as f:
-              f.write(c)
-
-          # 2. Root build.gradle ga ext parametrlarini berish (package_info_plus uchun)
-          root_gradle = 'android/build.gradle'
-          with open(root_gradle, 'r') as f:
-              rg = f.read()
-
-          ext_block = '''
-          allprojects {
-              ext.compileSdkVersion = 35
-              ext.targetSdkVersion = 35
-              ext.minSdkVersion = 21
-          }
-          '''
-          with open(root_gradle, 'w') as f:
-              f.write(ext_block + '\n' + rg)
-          "
-
-      - name: Build APK
-        run: flutter build apk --release --no-tree-shake-icons
+      - name: Build APK (Force Old Plugins Compat)
+        run: flutter build apk --release --no-tree-shake-icons --android-skip-build-dependency-validation
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
