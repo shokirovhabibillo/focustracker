@@ -28,8 +28,10 @@ jobs:
       - name: Get Dependencies
         run: flutter pub get
 
-      - name: Re-create Android files
-        run: flutter create . --platforms=android
+      - name: Re-create Android files from scratch
+        run: |
+          rm -rf android
+          flutter create . --platforms=android --org com.example
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
