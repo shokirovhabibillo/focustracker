@@ -19,11 +19,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Flutter (Latest Stable)
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'
+          flutter-version: '3.24.0'
           cache: true
+
+      - name: Ensure Missing Asset Directories Exist
+        run: |
+          mkdir -p assets/images
+          touch assets/images/.gitkeep
 
       - name: Get Dependencies
         run: flutter pub get
@@ -32,6 +37,38 @@ jobs:
         run: |
           rm -rf android
           flutter create . --platforms=android --org com.example
+
+      - name: Configure Desugaring & NDK Version
+        run: |
+          python3 -c "
+          app_gradle = 'android/app/build.gradle.kts'
+          import os
+          
+          # Kotlin DSL yoki Groovy ekanligini aniqlaymiz
+          if os.path.exists('android/app/build.gradle.kts'):
+              path = 'android/app/build.gradle.kts'
+              with open(path, 'r') as f:
+                  content = f.read()
+              
+              # Desugaring va NDK qo'shish
+              content = content.replace('android {', 'android {\n    ndkVersion = \"27.0.12077973\"')
+              content = content.replace('compileOptions {', 'compileOptions {\n        isCoreLibraryDesugaringEnabled = true')
+              content += '\ndependencies {\n    coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.0.4\")\n}\n'
+              
+              with open(path, 'w') as f:
+                  f.write(content)
+          elif os.path.exists('android/app/build.gradle'):
+              path = 'android/app/build.gradle'
+              with open(path, 'r') as f:
+                  content = f.read()
+              
+              content = content.replace('android {', 'android {\n    ndkVersion \"27.0.12077973\"')
+              content = content.replace('compileOptions {', 'compileOptions {\n        coreLibraryDesugaringEnabled true')
+              content += '\ndependencies {\n    coreLibraryDesugaring \"com.android.tools:desugar_jdk_libs:2.0.4\"\n}\n'
+              
+              with open(path, 'w') as f:
+                  f.write(content)
+          "
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
