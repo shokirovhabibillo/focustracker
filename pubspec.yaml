@@ -1,46 +1,25 @@
-name: focus_life_tracker
-description: "Focus & Life Tracker — productivity, planner va focus-analytics ilovasi"
+name: focustracker
+description: "A new Flutter project."
 publish_to: 'none'
+
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  package_info_plus: ^8.0.0 # yoki ^8.0.2 ga o'zgartiring (9.x versiyada Flutter Gradle Plugin ziddiyati bor)
 
-  # State management
-  provider: ^6.1.2
-
-  # Local database
-  sqflite: ^2.3.3
-  path: ^1.9.0
-  path_provider: ^2.1.3
-
-  # Date / time helpers
-  intl: ^0.19.0
-  table_calendar: ^3.1.2
-
-  # Notifications
-  flutter_local_notifications: ^17.2.2
-  timezone: ^0.9.4
-
-  # Keep screen on
-  wakelock_plus: ^1.2.5
-
-  # White-noise audio generator
+  cupertino_icons: ^1.0.8
   audioplayers: ^6.1.0
-
-  # Permissions (notifications, usage access)
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
+  provider: ^6.1.2
+  table_calendar: ^3.1.2
   permission_handler: ^11.3.1
-
-  # Native "Screen Time" style usage stats (Android UsageStatsManager wrapper)
-  usage_stats: ^1.3.0
-
-  # Orientation / device utilities
-  device_info_plus: ^10.1.0
+  usage_stats: ^1.3.1
+  wakelock_plus: ^1.2.8
 
 dev_dependencies:
   flutter_test:
@@ -51,4 +30,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/sounds/
-    - assets/images/
