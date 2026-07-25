@@ -64,3 +64,4 @@ SQLite (`sqflite`) orqali 4 jadval: `users_settings`, `tasks`,
   papkada.
 - **Ikonka va splash**: `flutter_launcher_icons` / `flutter_native_splash`
   paketlarini qo'shib, o'z brendingizga moslashtiring.
+ 
