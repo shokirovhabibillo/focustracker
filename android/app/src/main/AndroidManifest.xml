@@ -13,18 +13,13 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
             
-            <!-- Mana bu qator Embedding V2 ni yoqadi va xatoni yo'qotadi -->
-            <meta-data
-              android:name="flutterEmbedding"
-              android:value="2" />
-              
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         
-        <!-- Flutter freymvorki uchun kerakli meta-data -->
+        <!-- Android Embedding V2 uchun majburiy meta-data -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
