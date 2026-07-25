@@ -1,7 +1,8 @@
 plugins {
     id "com.android.application"
     id "kotlin-android"
-    id "dev.flutter.flutter-2-resources"
+    // Flutter pluginini ulash
+    id "dev.flutter.flutter-gradle-plugin"
 }
 
 def localProperties = new Properties()
@@ -24,34 +25,41 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.focustracker"
-    compileSdkVersion 34
-    ndkVersion flutter.ndkVersion
+    compileSdk 34
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = '17'
-        freeCompilerArgs += ["-Xskip-metadata-version-check"]
+        jvmTarget = '1.8'
     }
 
     defaultConfig {
+        // Ilovangiz ID'si (kerak bo'lsa o'zgartirishingiz mumkin)
         applicationId "com.example.focustracker"
-        minSdkVersion 21
-        targetSdkVersion 34
+        minSdk 21
+        targetSdk 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
 
     buildTypes {
         release {
+            // Hozircha debug kaliti bilan imzolash (GitHub Actions release build bo'lishi uchun)
             signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
         }
     }
 }
 
 flutter {
     source '../..'
+}
+
+dependencies {
+    // Kotlin versiyasi mosligini majburiy ta'minlash uchun BOM:
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:1.9.20')
 }
