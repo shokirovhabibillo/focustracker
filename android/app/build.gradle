@@ -33,6 +33,7 @@ android {
 
     kotlinOptions {
         jvmTarget = '1.8'
+        freeCompilerArgs += ["-Xskip-metadata-version-check"]
     }
 
     defaultConfig {
@@ -54,18 +55,4 @@ android {
 
 flutter {
     source '../..'
-}
-
-configurations.all {
-    resolutionStrategy {
-        // Barcha kutubxonalar va ularning qaramliklarida Kotlin stdlib'ni 1.9.20 ga majburlaymiz
-        force "org.jetbrains.kotlin:kotlin-stdlib:1.9.20"
-        force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.20"
-        force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.20"
-        force "org.jetbrains.kotlin:kotlin-stdlib-common:1.9.20"
-    }
-}
-
-dependencies {
-    implementation platform('org.jetbrains.kotlin:kotlin-bom:1.9.20')
 }
